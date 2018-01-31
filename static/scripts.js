@@ -38,7 +38,7 @@ $(document).ready(function() {
     // Options for map
     // https://developers.google.com/maps/documentation/javascript/reference#MapOptions
     let options = {
-        center: {lat: 43.0008, lng: -78.7890}, // Stanford, California
+        center: {lat: 42.3770, lng: -71.1256}, // Stanford, California
         disableDefaultUI: true,
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         maxZoom: 14,
@@ -64,16 +64,32 @@ $(document).ready(function() {
 function addMarker(place)
 {
     var marker = new google.maps.Marker({
-       position: new google.maps.LatLng(place['latitude'], place['longitude']),
-       title: place['country_code']
+      position: new google.maps.LatLng(place['latitude'], place['longitude']),
+      title: place['country_code']
     });
 
-    var info = new google.maps.InfoWindow({
-        content: "hello!"
-    });
+    let parameters = {
+        geo : place["place_name"]
+    };
 
-    google.maps.event.addListener(marker, 'click', function() {
-        info.open(marker.get('map'),marker);
+    count = 0;
+    currS = '';
+
+    marker.addListener('click', function(){
+        $.getJSON("/articles", parameters)
+        .done(function(data, textStatus, jqXHR) {
+            $.each(data, function() {
+                currS = currS + '<li><a href=' + data[count].link + '>' + data[count].title + '</a></li>';
+                count++
+            });
+            // currS = currS + '</ul></div>';
+            var info = new google.maps.InfoWindow({
+                content: currS
+            });
+            info.open(marker.get('map'), marker);
+            count = 0;
+            currS = '<div align="center"><h1></h1><br></div><div align="left" color="blue"><ul>';
+        });
     });
 
     markers.push(marker)
